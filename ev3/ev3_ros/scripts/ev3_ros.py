@@ -82,7 +82,6 @@ class Motor(Device):
 
     def cmd_cb(self, msg):
         if msg.name == self.name:
-
             cmd = msg.effort / self.POWER_TO_NM
             if cmd > self.POWER_MAX:
                 cmd = self.POWER_MAX
@@ -111,6 +110,90 @@ class Motor(Device):
         self.motor.run_forever(int(self.cmd), regulation_mode=False)
 
 
+class UltraSonicSensor(Device):
+    def __init__(self, params, lego):
+        super(UltraSonicSensor, self).__init__(params)
+        # create ultrasonic sensor
+        self.ultrasonic = lego.UltrasonicSensor(params['port'])
+        self.frame_id = params['frame_id']
+        self.spread = params['spread_angle']
+        self.min_range = params['min_range']
+        self.max_range = params['max_range']
+
+        # create publisher
+        self.pub = rospy.Publisher(params['name'], Range)
+
+    def trigger(self):
+        ds = Range()
+        ds.header.frame_id = self.frame_id
+        ds.header.stamp = rospy.Time.now()
+        ds.range = self.ultrasonic.get_sample() / 100.0
+        ds.spread_angle = self.spread
+        ds.range_min = self.min_range
+        ds.range_max = self.max_range
+        self.pub.publish(ds)
+
+
+class GyroSensor(Device):
+    def __init__(self, params, lego):
+        super(GyroSensor, self).__init__(params)
+        # create gyro sensor
+        self.gyro = lego.GyroSensor(params['port'])
+        self.frame_id = params['frame_id']
+        self.orientation = 0.0
+        self.offset = 0.0
+        self.prev_time = rospy.Time.now()
+
+        # calibrate
+        rospy.loginfo('Calibrating Gyro. Don\'t move the robot now')
+        start_time = rospy.Time.now()
+        cal_duration = rospy.Duration(2)
+        offset = 0
+        tmp_time = rospy.Time.now()
+        while rospy.Time.now() < start_time + cal_duration:
+            rospy.sleep(0.01)
+            sample = self.gyro.get_sample()
+            now = rospy.Time.now()
+            offset += (sample * (now - tmp_time).to_sec())
+            tmp_time = now
+        self.offset = offset / (tmp_time - start_time).to_sec()
+        rospy.loginfo('Gyro calibrated with offset %f', self.offset)
+
+        # create publisher
+        self.pub = rospy.Publisher(params['name'], Gyro)
+
+        # create publisher
+        self.pub2 = rospy.Publisher(params['name'] + '_imu', Imu)
+
+    def trigger(self):
+        sample = self.gyro.get_sample()
+        gs = Gyro()
+        gs.header.frame_id = self.frame_id
+        gs.header.stamp = rospy.Time.now()
+        gs.calibration_offset.x = 0.0
+        gs.calibration_offset.y = 0.0
+        gs.calibration_offset.z = self.offset
+        gs.angular_velocity.x = 0.0
+        gs.angular_velocity.y = 0.0
+        gs.angular_velocity.z = (sample - self.offset) * math.pi / 180.0
+        gs.angular_velocity_covariance = [0, 0, 0, 0, 0, 0, 0, 0, 1]
+        self.pub.publish(gs)
+
+        imu = Imu()
+        imu.header.frame_id = self.frame_id
+        imu.header.stamp = rospy.Time.now()
+        imu.angular_velocity.x = 0.0
+        imu.angular_velocity.y = 0.0
+        imu.angular_velocity.z = (sample-self.offset) * math.pi / 180.0
+        imu.angular_velocity_covariance = [0, 0, 0, 0, 0, 0, 0, 0, 1]
+        imu.orientation_covariance = [0.001, 0, 0, 0, 0.001, 0, 0, 0, 0.1]
+        self.orientation += imu.angular_velocity.z * (imu.header.stamp - self.prev_time).to_sec()
+        self.prev_time = imu.header.stamp
+        imu.orientation.x, imu.orientation.y, imu.orientation.z, imu.orientation.w = \
+            Rotation.RotZ(self.orientation).GetQuaternion()
+        self.pub2.publish(imu)
+
+
 def main():
     rospy.init_node('ev3_ros')
     ns = 'ev3_robot'
@@ -125,6 +208,10 @@ def main():
                       c['type'], c['name'], c['port'])
         if c['type'] == 'motor':
             components.append(Motor(c, lego))
+        elif c['type'] == 'ultrasonic':
+            components.append(UltraSonicSensor(c, lego))
+        elif c['type'] == 'gyro':
+            components.append(GyroSensor(c, lego))
         else:
             rospy.logerr('Invalid sensor/actuator type %s', c['type'])
 
