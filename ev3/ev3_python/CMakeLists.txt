@@ -1,10 +1,9 @@
 # Catkin User Guide: http://www.ros.org/doc/groovy/api/catkin/html/user_guide/user_guide.html
 # Catkin CMake Standard: http://www.ros.org/doc/groovy/api/catkin/html/user_guide/standards.html
 cmake_minimum_required(VERSION 2.8.3)
-project(ev3_ros)
+project(ev3_python)
 # Load catkin and all dependencies required for this package
-find_package(catkin REQUIRED COMPONENTS rospy ev3_python sensor_msgs ev3_msgs)
-find_package(orocos_kdl REQUIRED)
+find_package(catkin REQUIRED COMPONENTS rospy)
 
 #set the default path for built executables to the "bin" directory
 set(EXECUTABLE_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/bin)
@@ -13,16 +12,14 @@ set(LIBRARY_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/lib)
 
 # catkin_package parameters: http://ros.org/doc/groovy/api/catkin/html/dev_guide/generated_cmake_api.html#catkin-package
 catkin_package(
-    DEPENDS kdl
-    CATKIN_DEPENDS rospy ev3_python sensor_msgs ev3_msgs
+    CATKIN_DEPENDS rospy
     INCLUDE_DIRS
     LIBRARIES
 )
 
-#target_link_libraries(${PROJECT_NAME} ${catkin_LIBRARIES} ${orocos_kdl_LIBRARIES})
-
-# install Python-scripts
+## Install Python Examples
 install(PROGRAMS
-	scripts/ev3_ros.py
-	scripts/joint_states_aggregator.py
-  DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
+  sensor_tests/color_sensor_test.py
+  sensor_tests/touch_sensor_test.py
+  DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
+)
