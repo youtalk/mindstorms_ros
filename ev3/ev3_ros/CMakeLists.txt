@@ -3,7 +3,7 @@
 cmake_minimum_required(VERSION 2.8.3)
 project(ev3_ros)
 # Load catkin and all dependencies required for this package
-find_package(catkin REQUIRED COMPONENTS rospy ev3_python sensor_msgs ev3_msgs)
+find_package(catkin REQUIRED COMPONENTS rospy ev3_python sensor_msgs nxt_msgs)
 find_package(orocos_kdl REQUIRED)
 
 #set the default path for built executables to the "bin" directory
@@ -14,7 +14,7 @@ set(LIBRARY_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/lib)
 # catkin_package parameters: http://ros.org/doc/groovy/api/catkin/html/dev_guide/generated_cmake_api.html#catkin-package
 catkin_package(
     DEPENDS kdl
-    CATKIN_DEPENDS rospy ev3_python sensor_msgs ev3_msgs
+    CATKIN_DEPENDS rospy ev3_python sensor_msgs nxt_msgs
     INCLUDE_DIRS
     LIBRARIES
 )
