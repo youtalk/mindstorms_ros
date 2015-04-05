@@ -108,7 +108,7 @@ class Motor(Device):
         self.last_js = js
 
         # send command
-        self.motor.run_forever(int(self.cmd))
+        self.motor.run_forever(int(self.cmd), regulation_mode=False)
 
 
 def main():
