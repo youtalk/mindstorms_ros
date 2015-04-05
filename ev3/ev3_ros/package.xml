@@ -19,13 +19,13 @@
 
   <build_depend>kdl</build_depend>
   <build_depend>nxt_msgs</build_depend>
-  <build_depend>python_ev3</build_depend>
+  <build_depend>ev3_python</build_depend>
   <build_depend>rospy</build_depend>
   <build_depend>sensor_msgs</build_depend>
 
   <run_depend>kdl</run_depend>
   <run_depend>nxt_msgs</run_depend>
-  <run_depend>python_ev3</run_depend>
+  <run_depend>ev3_python</run_depend>
   <run_depend>rospy</run_depend>
   <run_depend>sensor_msgs</run_depend>
 </package>
