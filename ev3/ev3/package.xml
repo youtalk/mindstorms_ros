@@ -1,0 +1,21 @@
+<?xml version="1.0"?>
+<package>
+  <name>ev3</name>
+  <version>0.0.1</version>
+  <description>The ev3 package</description>
+
+  <maintainer email="yutaka.kondo@youtalk.jp">Yutaka Kondo</maintainer>
+
+  <license>BSD</license>
+
+  <author>Yutaka Kondo</author>
+
+  <buildtool_depend>catkin</buildtool_depend>
+
+  <run_depend>ev3_python</run_depend>
+  <run_depend>ev3_ros</run_depend>
+
+  <export>
+    <metapackage/>
+  </export>
+</package>
