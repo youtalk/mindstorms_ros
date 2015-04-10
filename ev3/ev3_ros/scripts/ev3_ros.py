@@ -74,7 +74,7 @@ class Motor(Device):
         self.cmd = 0  # default command
 
         # create publisher
-        self.pub = rospy.Publisher('joint_state', JointState)
+        self.pub = rospy.Publisher('joint_state', JointState, queue_size=5)
         self.last_js = None
 
         # create subscriber
@@ -92,10 +92,7 @@ class Motor(Device):
     def trigger(self):
         js = JointState()
         js.header.stamp = rospy.Time.now()
-        state = self.motor.get_output_state()
-        js.name.append(self.name)
-        js.position.append(state[9] * math.pi / 180.0)
-        js.effort.append(state[1] * self.POWER_TO_NM)
+        js.position.append(self.motor.position * math.pi / 180.0)
         if self.last_js:
             vel = (js.position[0] - self.last_js.position[0]) / \
                   (js.header.stamp - self.last_js.header.stamp).to_sec()
@@ -121,13 +118,13 @@ class UltraSonicSensor(Device):
         self.max_range = params['max_range']
 
         # create publisher
-        self.pub = rospy.Publisher(params['name'], Range)
+        self.pub = rospy.Publisher(params['name'], Range, queue_size=5)
 
     def trigger(self):
         ds = Range()
         ds.header.frame_id = self.frame_id
         ds.header.stamp = rospy.Time.now()
-        ds.range = self.ultrasonic.get_sample() / 100.0
+        ds.range = self.ultrasonic.dist_cm / 100.0
         ds.spread_angle = self.spread
         ds.range_min = self.min_range
         ds.range_max = self.max_range
@@ -152,7 +149,7 @@ class GyroSensor(Device):
         tmp_time = rospy.Time.now()
         while rospy.Time.now() < start_time + cal_duration:
             rospy.sleep(0.01)
-            sample = self.gyro.get_sample()
+            sample = self.gyro.ang
             now = rospy.Time.now()
             offset += (sample * (now - tmp_time).to_sec())
             tmp_time = now
@@ -160,13 +157,13 @@ class GyroSensor(Device):
         rospy.loginfo('Gyro calibrated with offset %f', self.offset)
 
         # create publisher
-        self.pub = rospy.Publisher(params['name'], Gyro)
+        self.pub = rospy.Publisher(params['name'], Gyro, queue_size=5)
 
         # create publisher
-        self.pub2 = rospy.Publisher(params['name'] + '_imu', Imu)
+        self.pub2 = rospy.Publisher(params['name'] + '_imu', Imu, queue_size=5)
 
     def trigger(self):
-        sample = self.gyro.get_sample()
+        sample = self.gyro.ang
         gs = Gyro()
         gs.header.frame_id = self.frame_id
         gs.header.stamp = rospy.Time.now()
