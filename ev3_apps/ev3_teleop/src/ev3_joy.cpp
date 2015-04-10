@@ -36,8 +36,6 @@ Ev3Teleop::Ev3Teleop():
   l_scale_(1.0),
   a_scale_(1.0)
 {
-
-
   ph_.param("axis_linear", linear_, linear_);
   ph_.param("axis_angular", angular_, angular_);
   ph_.param("axis_deadman", deadman_axis_, deadman_axis_);
@@ -67,7 +65,6 @@ void Ev3Teleop::publish()
     {
       vel_pub_.publish(last_published_);
     }
-
 }
 int main(int argc, char** argv)
 {

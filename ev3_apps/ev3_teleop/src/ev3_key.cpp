@@ -20,8 +20,6 @@ public:
   void watchdog();
 
 private:
-
-
   ros::NodeHandle nh_,ph_;
   double linear_, angular_;
   ros::Time last_publish_;
@@ -29,7 +27,6 @@ private:
   ros::Publisher vel_pub_;
   void publish(double, double);
   boost::mutex publish_mutex_;
-
 };
 
 Ev3Teleop::Ev3Teleop():
@@ -54,7 +51,6 @@ void quit(int sig)
   exit(0);
 }
 
-
 int main(int argc, char** argv)
 {
   ros::init(argc, argv, "ev3_teleop");
@@ -64,7 +60,6 @@ int main(int argc, char** argv)
   signal(SIGINT,quit);
 
   boost::thread my_thread(boost::bind(&Ev3Teleop::keyLoop, &ev3_teleop));
-
 
   ros::Timer timer = n.createTimer(ros::Duration(0.1), boost::bind(&Ev3Teleop::watchdog, &ev3_teleop));
 
@@ -76,7 +71,6 @@ int main(int argc, char** argv)
   return(0);
 }
 
-
 void Ev3Teleop::watchdog()
 {
   boost::mutex::scoped_lock lock(publish_mutex_);
@@ -87,7 +81,6 @@ void Ev3Teleop::watchdog()
 void Ev3Teleop::keyLoop()
 {
   char c;
-
 
   // get the console in raw mode
   tcgetattr(kfd, &cooked);
@@ -102,7 +95,6 @@ void Ev3Teleop::keyLoop()
   puts("---------------------------");
   puts("Use arrow keys to move the ev3.");
 
-
   for(;;)
   {
     // get the next event from the keyboard
@@ -112,26 +104,25 @@ void Ev3Teleop::keyLoop()
       exit(-1);
     }
 
-
     linear_=angular_=0;
     ROS_DEBUG("value: 0x%02X\n", c);
 
     switch(c)
     {
       case KEYCODE_L:
-        ROS_DEBUG("LEFT");
+        ROS_INFO("LEFT");
         angular_ = 1.0;
         break;
       case KEYCODE_R:
-        ROS_DEBUG("RIGHT");
+        ROS_INFO("RIGHT");
         angular_ = -1.0;
         break;
       case KEYCODE_U:
-        ROS_DEBUG("UP");
+        ROS_INFO("UP");
         linear_ = 1.0;
         break;
       case KEYCODE_D:
-        ROS_DEBUG("DOWN");
+        ROS_INFO("DOWN");
         linear_ = -1.0;
         break;
     }
@@ -150,7 +141,6 @@ void Ev3Teleop::publish(double angular, double linear)
     vel.linear.x = l_scale_*linear;
 
     vel_pub_.publish(vel);
-
 
   return;
 }
