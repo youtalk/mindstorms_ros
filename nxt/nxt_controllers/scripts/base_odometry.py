@@ -31,7 +31,7 @@
 # ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
-import roslib; roslib.load_manifest('nxt_controllers')  
+import roslib; roslib.load_manifest('nxt_controllers')
 import rospy
 import math
 import thread
@@ -47,7 +47,7 @@ PUBLISH_TF = False
 class BaseOdometry:
     def __init__(self):
         self.initialized = False
-        
+
         self.ns =rospy.get_namespace() + 'base_parameters/'
         # get joint name
         self.l_joint = rospy.get_param(self.ns +'l_wheel_joint')
@@ -64,7 +64,7 @@ class BaseOdometry:
             self.br = tf.TransformBroadcaster()
 
         # publish results on topic
-        self.pub = rospy.Publisher('odom', Odometry)
+        self.pub = rospy.Publisher('odom', Odometry, queue_size=5)
 
         self.initialized = False
 
@@ -73,7 +73,7 @@ class BaseOdometry:
         position = {}
         for name, pos in zip(msg.name, msg.position):
             position[name] = pos
-        
+
         # initialize
         if not self.initialized:
             self.r_pos = position[self.r_joint]
@@ -92,20 +92,20 @@ class BaseOdometry:
             if PUBLISH_TF:
                 self.br.sendTransform(self.pose.p, self.pose.M.GetQuaternion(), rospy.Time.now(), 'base_link', 'odom')
 
-            
+
             self.rot_covar = 1.0
             if delta_rot == 0:
                 self.rot_covar = 0.00000000001
-        
+
             odom = Odometry()
             odom.header.stamp = rospy.Time.now()
             odom.pose.pose = posemath.toMsg(self.pose)
             odom.pose.covariance = [0.00001, 0, 0, 0, 0, 0,
-                                    0, 0.00001, 0, 0, 0, 0, 
+                                    0, 0.00001, 0, 0, 0, 0,
                                     0, 0, 10.0000, 0, 0, 0,
                                     0, 0, 0, 1.00000, 0, 0,
                                     0, 0, 0, 0, 1.00000, 0,
-                                    0, 0, 0, 0, 0, self.rot_covar]   
+                                    0, 0, 0, 0, 0, self.rot_covar]
             self.pub.publish(odom)
 
 def main():

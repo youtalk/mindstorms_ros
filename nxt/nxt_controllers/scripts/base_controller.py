@@ -32,7 +32,7 @@
 # POSSIBILITY OF SUCH DAMAGE.
 
 
-import roslib; roslib.load_manifest('nxt_controllers')  
+import roslib; roslib.load_manifest('nxt_controllers')
 import rospy
 import math
 import thread
@@ -48,7 +48,7 @@ class BaseController:
         self.vel_trans = 0
         self.vel_rot = 0
 
-        self.ns =rospy.get_namespace() + 'base_parameters/' 
+        self.ns =rospy.get_namespace() + 'base_parameters/'
         # get joint name
         self.l_joint = rospy.get_param(self.ns +'l_wheel_joint')
         self.r_joint = rospy.get_param(self.ns +'r_wheel_joint')
@@ -59,12 +59,12 @@ class BaseController:
         self.k_trans = 0.055/self.vel_to_eff
 
         # joint interaction
-        self.pub = rospy.Publisher('joint_command', JointCommand)
+        self.pub = rospy.Publisher('joint_command', JointCommand, queue_size=5)
         rospy.Subscriber('joint_states', JointState, self.jnt_state_cb)
 
         # base commands
         rospy.Subscriber('cmd_vel', Twist, self.cmd_vel_cb)
-        
+
     def cmd_vel_cb(self, msg):
         self.vel_rot_desi = msg.angular.z
         self.vel_trans_desi = msg.linear.x
@@ -81,7 +81,7 @@ class BaseController:
         # velocity commands
         vel_trans = self.vel_trans_desi + self.k_trans*(self.vel_trans_desi - self.vel_trans)
         vel_rot = self.vel_rot_desi + self.k_rot*(self.vel_rot_desi - self.vel_rot)
-        
+
         # wheel commands
         l_cmd = JointCommand()
         l_cmd.name = self.l_joint
