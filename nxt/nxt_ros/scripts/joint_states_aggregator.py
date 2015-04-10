@@ -31,10 +31,8 @@
 # ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
-
 import roslib; roslib.load_manifest('nxt_ros')  
 import rospy
-import math
 from sensor_msgs.msg import JointState
 
 
@@ -97,13 +95,11 @@ class JSAggregator:
             
         self.pub.publish(msg_out)
 
+
 def main():
     rospy.init_node("joint_state_aggregator")
-
     agg = JSAggregator()
-
     rospy.spin()
-
 
 
 if __name__ == '__main__':

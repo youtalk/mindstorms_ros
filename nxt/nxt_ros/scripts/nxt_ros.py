@@ -31,9 +31,7 @@
 # ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
-
-
-import roslib; roslib.load_manifest('nxt_ros')  
+import roslib; roslib.load_manifest('nxt_ros')
 import nxt.locator
 import rospy
 import math
@@ -53,6 +51,7 @@ POWER_MAX = 125
 
 global my_lock
 my_lock = thread.allocate_lock()
+
 
 def check_params(ns, params):
     for p in params:
@@ -150,8 +149,6 @@ class Motor(Device):
 
         # send command
         self.motor.run(int(self.cmd), 0)
-
-
 
 
 class TouchSensor(Device):
@@ -255,6 +252,7 @@ class GyroSensor(Device):
         (imu.orientation.x, imu.orientation.y, imu.orientation.z, imu.orientation.w) = Rotation.RotZ(self.orientation).GetQuaternion()
         self.pub2.publish(imu)
 
+
 class AccelerometerSensor(Device):
     def __init__(self, params, comm):
         Device.__init__(self, params)
@@ -275,6 +273,7 @@ class AccelerometerSensor(Device):
         gs.linear_acceleration.z = z*9.8
         gs.linear_acceleration_covariance = [1, 0, 0, 0, 1, 0, 0, 0, 1]
         self.pub.publish(gs)
+
 
 class ColorSensor(Device):
     def __init__(self, params, comm):
@@ -356,7 +355,6 @@ class IntensitySensor(Device):
         self.pub.publish(co)
 
 
-
 def main():
     rospy.init_node('nxt_ros')
     ns = 'nxt_robot'
@@ -399,7 +397,6 @@ def main():
         if (now - last_callback_handle).to_sec() > 1.0/callback_handle_frequency:
             last_callback_handle = now
             rospy.sleep(0.01)
-
 
 
 if __name__ == '__main__':
