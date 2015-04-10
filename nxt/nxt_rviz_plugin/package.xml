@@ -33,7 +33,7 @@
   <!-- <test_depend>tf</test_depend> -->
 
 <export>
-    <rviz plugin="${prefix}/lib/nxt_rviz_plugin.yaml"/>
+    <rviz plugin="${prefix}/lib/nxt_rviz_plugin.xml"/>
 </export>
 
 </package>
