@@ -59,9 +59,17 @@ Visualization Manager:
           Value: true
         base_link:
           Value: true
+        body_link:
+          Value: true
+        gyro_link:
+          Value: true
+        l_wheel_link:
+          Value: true
         odom_combined:
           Value: true
-        ref_0_link:
+        r_wheel_link:
+          Value: true
+        ultrasonic_link:
           Value: true
       Marker Scale: 0.2
       Name: TF
@@ -72,8 +80,15 @@ Visualization Manager:
         odom_combined:
           base_footprint:
             base_link:
-              ref_0_link:
-                {}
+              body_link:
+                gyro_link:
+                  {}
+                l_wheel_link:
+                  {}
+                r_wheel_link:
+                  {}
+                ultrasonic_link:
+                  {}
       Update Interval: 0
       Value: true
     - Alpha: 0.5
@@ -90,7 +105,27 @@ Visualization Manager:
           Alpha: 1
           Show Axes: false
           Show Trail: false
-        ref_0_link:
+        body_link:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        gyro_link:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        l_wheel_link:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        r_wheel_link:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        ultrasonic_link:
           Alpha: 1
           Show Axes: false
           Show Trail: false
@@ -125,22 +160,22 @@ Visualization Manager:
   Views:
     Current:
       Class: rviz/Orbit
-      Distance: 0.853172
+      Distance: 0.660696
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.06
         Stereo Focal Distance: 1
         Swap Stereo Eyes: false
         Value: false
       Focal Point:
-        X: 0.04744
-        Y: -0.103418
-        Z: -0.0223686
+        X: -0.0278788
+        Y: -0.0486693
+        Z: 0.000727687
       Name: Current View
       Near Clip Distance: 0.01
-      Pitch: 0.125399
+      Pitch: 0.655399
       Target Frame: <Fixed Frame>
       Value: Orbit (rviz)
-      Yaw: 0.90539
+      Yaw: 0.75039
     Saved: ~
 Window Geometry:
   Displays:

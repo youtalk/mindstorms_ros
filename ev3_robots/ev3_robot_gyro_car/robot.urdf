@@ -71,7 +71,7 @@
 
   <link name="ultrasonic_link">
     <visual>
-      <origin xyz="0 0 0" rpy="0 1.57079 0" />
+      <origin xyz="0 0 0" rpy="0 0 0" />
       <geometry>
         <box size="0.02 0.055 0.02"/>
       </geometry>
@@ -81,7 +81,7 @@
   <joint name="gyro_joint" type="fixed">
     <parent link="body_link"/>
     <child link="gyro_link"/>
-    <origin xyz="-0.09 0 0.065" rpy="0 1.57079 0" />
+    <origin xyz="-0.09 0 0.065" rpy="0 0 0" />
     <axis xyz="0 0 1" />
   </joint>
 
