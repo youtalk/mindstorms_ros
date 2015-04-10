@@ -1,0 +1,9 @@
+<?xml version="1.0"?>
+<launch>
+  <arg name="scale_linear" value="1.0"/>
+  <arg name="scale_angular" value="1.0"/>
+  <node pkg="ev3_teleop" type="ev3_teleop_key" name="ev3_teleop"  output="screen">
+    <param name="scale_linear" value="$(arg scale_linear)" type="double"/>
+    <param name="scale_angular" value="$(arg scale_angular)" type="double"/>
+  </node>
+</launch>
