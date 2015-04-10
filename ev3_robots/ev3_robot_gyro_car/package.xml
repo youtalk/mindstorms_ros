@@ -1,0 +1,26 @@
+<?xml version="1.0"?>
+<package>
+  <name>ev3_robot_gyro_car</name>
+  <version>0.0.1</version>
+  <description>The ev3_robot_gyro_car package</description>
+
+  <maintainer email="yutaka.kondo@youtalk.jp">Yutaka Kondo</maintainer>
+
+  <license>BSD</license>
+
+  <author>Yutaka Kondo</author>
+
+  <buildtool_depend>catkin</buildtool_depend>
+
+  <build_depend>ev3_description</build_depend>
+  <build_depend>ev3_ros</build_depend>
+  <build_depend>nxt_controllers</build_depend>
+  <build_depend>robot_pose_ekf</build_depend>
+  <build_depend>robot_state_publisher</build_depend>
+
+  <run_depend>ev3_description</run_depend>
+  <run_depend>ev3_ros</run_depend>
+  <run_depend>nxt_controllers</run_depend>
+  <run_depend>robot_pose_ekf</run_depend>
+  <run_depend>robot_state_publisher</run_depend>
+</package>
