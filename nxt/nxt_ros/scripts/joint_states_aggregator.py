@@ -19,7 +19,7 @@
 #    from this software without specific prior written permission.
 #
 # THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
-# "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+# 'AS IS' AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
 # LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
 # FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
 # COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
@@ -57,28 +57,31 @@ class JSAggregator:
     def callback(self, data):
         num_joints = len(data.name)
         if len(data.position) < num_joints:
-            rospy.logerr("Position array shorter than names %s < %d"%(len(data.position), num_joints))
+            rospy.logerr('Position array shorter than names %s < %d' %
+                         (len(data.position), num_joints))
             return
         elif len(data.velocity) < num_joints:
-            rospy.logerr("Velocity array shorter than names %s < %d"%(len(data.velocity), num_joints))
+            rospy.logerr('Velocity array shorter than names %s < %d' %
+                         (len(data.velocity), num_joints))
             return
         elif len(data.effort) < num_joints:
-            rospy.logerr("Effort array shorter than names %s < %d"%(len(data.effort), num_joints))
+            rospy.logerr('Effort array shorter than names %s < %d' %
+                         (len(data.effort), num_joints))
             return
 
         for i in xrange(0, num_joints):
-            self.observed_states[data.name[i]] = JS(data.name[i], 
-                                                    data.header, 
-                                                    data.position[i], 
-                                                    data.velocity[i], 
-                                                    data.effort[i])
-            
-        todelete = [k for k, v in self.observed_states.iteritems() if  data.header.stamp - v.header.stamp > rospy.Duration().from_sec(10.0) ] #hack parametersize
+            self.observed_states[data.name[i]] = JS(
+                data.name[i], data.header,
+                data.position[i], data.velocity[i], data.effort[i])
+
+        # hack parametersize
+        todelete = [k for k, v in self.observed_states.iteritems()
+                    if data.header.stamp - v.header.stamp > rospy.Duration().from_sec(10.0)]
         for td in todelete:
             del self.observed_states[td]
 
-
-        # Only publish if there has been as many updates as there are joints, otherwise odom, gets zero deltas and the robot jerks around. 
+        # Only publish if there has been as many updates as there are joints,
+        # otherwise odom, gets zero deltas and the robot jerks around.
         if self.updates_since_publish < len(self.observed_states.keys()):
             self.updates_since_publish += 1
             return
@@ -87,7 +90,7 @@ class JSAggregator:
         msg_out = JointState()
         msg_out.header = data.header        
         for k, v in self.observed_states.iteritems():
-            #print k, v
+            # print k, v
             msg_out.name.append(v.name)
             msg_out.position.append(v.position)
             msg_out.velocity.append(v.velocity)
@@ -97,7 +100,7 @@ class JSAggregator:
 
 
 def main():
-    rospy.init_node("joint_state_aggregator")
+    rospy.init_node('joint_state_aggregator')
     agg = JSAggregator()
     rospy.spin()
 
