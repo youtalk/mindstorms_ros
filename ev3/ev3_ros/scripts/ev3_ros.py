@@ -7,7 +7,6 @@ import thread
 import roslib; roslib.load_manifest('ev3_ros')
 import rospy
 from sensor_msgs.msg import JointState, Imu
-from std_msgs.msg import Bool
 from PyKDL import Rotation
 import rpyc
 import nxt.error
@@ -63,8 +62,8 @@ class Device(object):
 
 
 class Motor(Device):
-    POWER_TO_NM = 0.01
-    POWER_MAX = 125
+    POWER_TO_NM = 100
+    POWER_MAX = 100
 
     def __init__(self, params, lego):
         super(Motor, self).__init__(params)
@@ -82,7 +81,7 @@ class Motor(Device):
 
     def cmd_cb(self, msg):
         if msg.name == self.name:
-            cmd = msg.effort / self.POWER_TO_NM
+            cmd = msg.effort * self.POWER_TO_NM
             if cmd > self.POWER_MAX:
                 cmd = self.POWER_MAX
             elif cmd < -self.POWER_MAX:
