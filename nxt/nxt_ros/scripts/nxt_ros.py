@@ -19,7 +19,7 @@
 #    from this software without specific prior written permission.
 #
 # THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
-# "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+# 'AS IS' AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
 # LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
 # FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
 # COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
@@ -37,12 +37,10 @@ import rospy
 import math
 from nxt.motor import PORT_A, PORT_B, PORT_C
 from nxt.sensor import PORT_1, PORT_2, PORT_3, PORT_4
-from nxt.sensor import Type
-import nxt.sensor 
+import nxt.sensor
 import nxt.motor 
 import thread
 from sensor_msgs.msg import JointState, Imu
-from std_msgs.msg import Bool
 from nxt_msgs.msg import Range, Contact, JointCommand, Color, Gyro, Accelerometer
 from PyKDL import Rotation
 
@@ -60,8 +58,7 @@ def check_params(ns, params):
     return True
 
 
-# base class for sensors
-class Device:
+class Device(object):
     def __init__(self, params):
         self.desired_period = 1.0 / params['desired_frequency']
         self.period = self.desired_period
@@ -73,35 +70,39 @@ class Device:
         if not self.initialized:
             self.initialized = True
             self.last_run = rospy.Time.now()
-            rospy.logdebug('Initializing %s'%self.name)
+            rospy.logdebug('Initializing %s', self.name)
             return False
         # compute frequency
         now = rospy.Time.now()
-        period = 0.9 * self.period + 0.1 * (now - self.last_run).to_sec() 
-        
+        period = 0.9 * self.period + 0.1 * (now - self.last_run).to_sec()
+
         # check period
         if period > self.desired_period * 1.2:
-            rospy.logwarn("%s not reaching desired frequency: actual %f, desired %f"%(self.name, 1.0/period, 1.0/self.desired_period))
+            rospy.logwarn('%s not reaching desired frequency: actual %f, desired %f',
+                          self.name, 1.0 / period, 1.0 / self.desired_period)
         elif period > self.desired_period * 1.5:
-            rospy.logerr("%s not reaching desired frequency: actual %f, desired %f"%(self.name, 1.0/period, 1.0/self.desired_period))
+            rospy.logerr('%s not reaching desired frequency: actual %f, desired %f',
+                         self.name, 1.0 / period, 1.0 / self.desired_period)
 
         return period > self.desired_period
 
+    def trigger(self):
+        raise NotImplementedError()
 
     def do_trigger(self):
         try:
-          rospy.logdebug('Trigger %s with current frequency %f'%(self.name, 1.0/self.period))
-          now = rospy.Time.now()
-          self.period = 0.9 * self.period + 0.1 * (now - self.last_run).to_sec() 
-          self.last_run = now
-          self.trigger()
-          rospy.logdebug('Trigger %s took %f mili-seconds'%(self.name, (rospy.Time.now() - now).to_sec()*1000))
-        except nxt.error.DirProtError: 
-          rospy.logwarn("caught an exception nxt.error.DirProtError")
-          pass
+            rospy.logdebug('Trigger %s with current frequency %f',
+                           self.name, 1.0/self.period)
+            now = rospy.Time.now()
+            self.period = 0.9 * self.period + 0.1 * (now - self.last_run).to_sec()
+            self.last_run = now
+            self.trigger()
+            rospy.logdebug('Trigger %s took %f mili-seconds',
+                           self.name, (rospy.Time.now() - now).to_sec() * 1000)
         except nxt.error.I2CError:
-          rospy.logwarn("caught an exception nxt.error.I2CError")
-          pass
+            rospy.logwarn('caught an exception nxt.error.I2CError')
+        except nxt.error.DirProtError:
+            rospy.logwarn('caught an exception nxt.error.DirProtError')
 
 
 class Motor(Device):
@@ -110,7 +111,7 @@ class Motor(Device):
         # create motor
         self.name = params['name']
         self.motor = nxt.motor.Motor(comm, eval(params['port']))
-        self.cmd = 0 #default command
+        self.cmd = 0  # default command
 
         # create publisher
         self.pub = rospy.Publisher('joint_state', JointState)
@@ -118,7 +119,6 @@ class Motor(Device):
         
         # create subscriber
         self.sub = rospy.Subscriber('joint_command', JointCommand, self.cmd_cb, None, 2)
-
 
     def cmd_cb(self, msg):
         if msg.name == self.name:
@@ -128,8 +128,8 @@ class Motor(Device):
                 cmd = POWER_MAX
             elif cmd < -POWER_MAX:
                 cmd = -POWER_MAX
-            self.cmd = cmd  #save command
-
+            self.cmd = cmd  # save command
+            
     def trigger(self):
         js = JointState()
         js.header.stamp = rospy.Time.now()
@@ -139,7 +139,8 @@ class Motor(Device):
         js.effort.append(state[1] * POWER_TO_NM)
         vel = 0
         if self.last_js:
-            vel = (js.position[0]-self.last_js.position[0])/(js.header.stamp-self.last_js.header.stamp).to_sec()
+            vel = (js.position[0] - self.last_js.position[0]) / \
+                  (js.header.stamp - self.last_js.header.stamp).to_sec()
             js.velocity.append(vel)
         else:
             vel = 0
@@ -169,7 +170,6 @@ class TouchSensor(Device):
         self.pub.publish(ct)
 
 
-
 class UltraSonicSensor(Device):
     def __init__(self, params, comm):
         Device.__init__(self, params)
@@ -197,7 +197,7 @@ class UltraSonicSensor(Device):
 class GyroSensor(Device):
     def __init__(self, params, comm):
         Device.__init__(self, params)
-        #create gyro sensor
+        # create gyro sensor
         self.gyro = nxt.sensor.GyroSensor(comm, eval(params['port']))
         self.frame_id = params['frame_id']
         self.orientation = 0.0
@@ -205,9 +205,9 @@ class GyroSensor(Device):
         self.prev_time = rospy.Time.now()
 
         # calibrate
-        rospy.loginfo("Calibrating Gyro. Don't move the robot now")
+        rospy.loginfo('Calibrating Gyro. Don\'t move the robot now')
         start_time = rospy.Time.now()
-        cal_duration = rospy.Duration(2.0)
+        cal_duration = rospy.Duration(2)
         offset = 0
         tmp_time = rospy.Time.now()
         while rospy.Time.now() < start_time + cal_duration:
@@ -217,13 +217,13 @@ class GyroSensor(Device):
             offset += (sample * (now - tmp_time).to_sec())
             tmp_time = now
         self.offset = offset / (tmp_time - start_time).to_sec()
-        rospy.loginfo("Gyro calibrated with offset %f"%self.offset)
+        rospy.loginfo('Gyro calibrated with offset %f'%self.offset)
 
         # create publisher
         self.pub = rospy.Publisher(params['name'], Gyro)
 
         # create publisher
-        self.pub2 = rospy.Publisher(params['name']+"_imu", Imu)
+        self.pub2 = rospy.Publisher(params['name']+'_imu', Imu)
 
     def trigger(self):
         sample = self.gyro.get_sample()
@@ -235,7 +235,7 @@ class GyroSensor(Device):
         gs.calibration_offset.z = self.offset
         gs.angular_velocity.x = 0.0
         gs.angular_velocity.y = 0.0
-        gs.angular_velocity.z = (sample-self.offset)*math.pi/180.0
+        gs.angular_velocity.z = (sample - self.offset) * math.pi / 180.0
         gs.angular_velocity_covariance = [0, 0, 0, 0, 0, 0, 0, 0, 1]
         self.pub.publish(gs)
 
@@ -247,16 +247,18 @@ class GyroSensor(Device):
         imu.angular_velocity.z = (sample-self.offset)*math.pi/180.0
         imu.angular_velocity_covariance = [0, 0, 0, 0, 0, 0, 0, 0, 1]
         imu.orientation_covariance = [0.001, 0, 0, 0, 0.001, 0, 0, 0, 0.1]
-        self.orientation += imu.angular_velocity.z * (imu.header.stamp - self.prev_time).to_sec()
+        self.orientation += imu.angular_velocity.z * \
+                            (imu.header.stamp - self.prev_time).to_sec()
         self.prev_time = imu.header.stamp
-        (imu.orientation.x, imu.orientation.y, imu.orientation.z, imu.orientation.w) = Rotation.RotZ(self.orientation).GetQuaternion()
+        imu.orientation.x, imu.orientation.y, imu.orientation.z, imu.orientation.w = \
+            Rotation.RotZ(self.orientation).GetQuaternion()
         self.pub2.publish(imu)
 
 
 class AccelerometerSensor(Device):
     def __init__(self, params, comm):
         Device.__init__(self, params)
-        #create gyro sensor
+        # create gyro sensor
         self.accel = nxt.sensor.AccelerometerSensor(comm, eval(params['port']))
         self.frame_id = params['frame_id']
 
@@ -267,10 +269,10 @@ class AccelerometerSensor(Device):
         gs = Accelerometer()
         gs.header.frame_id = self.frame_id
         gs.header.stamp = rospy.Time.now()
-        x,y,z = self.accel.get_sample()
-        gs.linear_acceleration.x = x*9.8
-        gs.linear_acceleration.y = y*9.8
-        gs.linear_acceleration.z = z*9.8
+        x, y, z = self.accel.get_sample()
+        gs.linear_acceleration.x = x * 9.8
+        gs.linear_acceleration.y = y * 9.8
+        gs.linear_acceleration.z = z * 9.8
         gs.linear_acceleration_covariance = [1, 0, 0, 0, 1, 0, 0, 0, 1]
         self.pub.publish(gs)
 
@@ -295,23 +297,23 @@ class ColorSensor(Device):
             co.r = 0.0
             co.g = 0.0
             co.b = 0.0
-        elif color == 2: # blue
+        elif color == 2:  # blue
             co.r = 0.0
             co.g = 0.0
             co.b = 1.0
-        elif color == 3: # green
+        elif color == 3:  # green
             co.r = 0.0
             co.g = 1.0
             co.b = 0.0
-        elif color == 4: # yellow
+        elif color == 4:  # yellow
             co.r = 1.0
             co.g = 1.0
             co.b = 0.0
-        elif color == 5: # red
+        elif color == 5:  # red
             co.r = 1.0
             co.g = 0.0
             co.b = 1.0
-        elif color == 6: # white
+        elif color == 6:  # white
             co.r = 1.0
             co.g = 1.0
             co.b = 1.0
@@ -358,14 +360,15 @@ class IntensitySensor(Device):
 def main():
     rospy.init_node('nxt_ros')
     ns = 'nxt_robot'
-    host = rospy.get_param("~host", None)
+    host = rospy.get_param('~host', None)
     sock = nxt.locator.find_one_brick(host)
     b = sock.connect()
 
-    config = rospy.get_param("~"+ns)
+    config = rospy.get_param('~'+ns)
     components = []
     for c in config:
-        rospy.loginfo("Creating %s with name %s on %s",c['type'],c['name'],c['port'])
+        rospy.loginfo('Creating %s with name %s on %s',
+                      c['type'], c['name'], c['port'])
         if c['type'] == 'motor':
             components.append(Motor(c, b))
         elif c['type'] == 'touch':
@@ -381,7 +384,7 @@ def main():
         elif c['type'] == 'accelerometer':
             components.append(AccelerometerSensor(c, b))
         else:
-            rospy.logerr('Invalid sensor/actuator type %s'%c['type'])
+            rospy.logerr('Invalid sensor/actuator type %s' % c['type'])
 
     callback_handle_frequency = 10.0
     last_callback_handle = rospy.Time.now()
@@ -394,7 +397,7 @@ def main():
                 triggered = True
         my_lock.release()
         now = rospy.Time.now()
-        if (now - last_callback_handle).to_sec() > 1.0/callback_handle_frequency:
+        if (now - last_callback_handle).to_sec() > 1.0 / callback_handle_frequency:
             last_callback_handle = now
             rospy.sleep(0.01)
 

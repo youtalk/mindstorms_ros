@@ -31,14 +31,12 @@
 # ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
-
 import roslib; roslib.load_manifest('nxt_controllers')
 import rospy
-import math
-import thread
 from sensor_msgs.msg import JointState
 from geometry_msgs.msg import Twist
-from nxt_msgs.msg import Range, JointCommand
+from nxt_msgs.msg import JointCommand
+
 
 class BaseController:
     def __init__(self):
@@ -48,15 +46,15 @@ class BaseController:
         self.vel_trans = 0
         self.vel_rot = 0
 
-        self.ns =rospy.get_namespace() + 'base_parameters/'
+        self.ns = rospy.get_namespace() + 'base_parameters/'
         # get joint name
-        self.l_joint = rospy.get_param(self.ns +'l_wheel_joint')
-        self.r_joint = rospy.get_param(self.ns +'r_wheel_joint')
-        self.wheel_radius = rospy.get_param(self.ns +'wheel_radius', 0.022)
-        self.wheel_basis = rospy.get_param(self.ns +'wheel_basis', 0.055)
-        self.vel_to_eff = rospy.get_param(self.ns +'vel_to_eff', 0.5)
-        self.k_rot = 0.075/self.vel_to_eff
-        self.k_trans = 0.055/self.vel_to_eff
+        self.l_joint = rospy.get_param(self.ns + 'l_wheel_joint')
+        self.r_joint = rospy.get_param(self.ns + 'r_wheel_joint')
+        self.wheel_radius = rospy.get_param(self.ns + 'wheel_radius', 0.022)
+        self.wheel_basis = rospy.get_param(self.ns + 'wheel_basis', 0.055)
+        self.vel_to_eff = rospy.get_param(self.ns + 'vel_to_eff', 0.5)
+        self.k_rot = 0.075 / self.vel_to_eff
+        self.k_trans = 0.055 / self.vel_to_eff
 
         # joint interaction
         self.pub = rospy.Publisher('joint_command', JointCommand, queue_size=5)
@@ -74,31 +72,44 @@ class BaseController:
         for name, vel in zip(msg.name, msg.velocity):
             velocity[name] = vel
 
+        if self.r_joint not in velocity or self.l_joint not in velocity:
+            rospy.logerr('%s or %s are not in joint_states topic' %
+                         (self.r_joint, self.l_joint))
+            return
+
         # lowpass for measured velocity
-        self.vel_trans = 0.5*self.vel_trans + 0.5*(velocity[self.r_joint] + velocity[self.l_joint])*self.wheel_radius/2.0
-        self.vel_rot =   0.5*self.vel_rot   + 0.5*(velocity[self.r_joint] - velocity[self.l_joint])*self.wheel_radius/(2.0*self.wheel_basis)
+        self.vel_trans = 0.5 * self.vel_trans + \
+                         0.5 * (velocity[self.r_joint] + velocity[self.l_joint]) * \
+                         self.wheel_radius / 2.0
+        self.vel_rot = 0.5 * self.vel_rot + \
+                       0.5 * (velocity[self.r_joint] - velocity[self.l_joint]) * \
+                       self.wheel_radius / (2.0 * self.wheel_basis)
 
         # velocity commands
-        vel_trans = self.vel_trans_desi + self.k_trans*(self.vel_trans_desi - self.vel_trans)
-        vel_rot = self.vel_rot_desi + self.k_rot*(self.vel_rot_desi - self.vel_rot)
+        vel_trans = self.vel_trans_desi + self.k_trans * (
+        self.vel_trans_desi - self.vel_trans)
+        vel_rot = self.vel_rot_desi + self.k_rot * (
+        self.vel_rot_desi - self.vel_rot)
 
         # wheel commands
         l_cmd = JointCommand()
         l_cmd.name = self.l_joint
-        l_cmd.effort = self.vel_to_eff*(vel_trans/self.wheel_radius - vel_rot*self.wheel_basis/self.wheel_radius)
+        l_cmd.effort = self.vel_to_eff * (
+        vel_trans / self.wheel_radius - vel_rot * self.wheel_basis /
+        self.wheel_radius)
         self.pub.publish(l_cmd)
 
         r_cmd = JointCommand()
         r_cmd.name = self.r_joint
-        r_cmd.effort = self.vel_to_eff*(vel_trans/self.wheel_radius + vel_rot*self.wheel_basis/self.wheel_radius)
+        r_cmd.effort = self.vel_to_eff * (vel_trans / self.wheel_radius +
+                                          vel_rot * self.wheel_basis / self.wheel_radius)
         self.pub.publish(r_cmd)
 
 
 def main():
     rospy.init_node('nxt_base_controller')
-    base_controller = BaseController()
+    BaseController()
     rospy.spin()
-
 
 
 if __name__ == '__main__':

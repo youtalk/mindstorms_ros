@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<robot name=quick_start>
+<robot name="ev3_robot_gyro_car">
 
   <link name="base_link"/>
   <joint name="base_joint" type="fixed">
