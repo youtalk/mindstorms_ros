@@ -148,19 +148,19 @@ void NxtTeleop::keyLoop()
     switch(c)
     {
       case KEYCODE_L:
-        ROS_DEBUG("LEFT");
+        ROS_INFO("LEFT");
         angular_ = 1.0;
         break;
       case KEYCODE_R:
-        ROS_DEBUG("RIGHT");
+        ROS_INFO("RIGHT");
         angular_ = -1.0;
         break;
       case KEYCODE_U:
-        ROS_DEBUG("UP");
+        ROS_INFO("UP");
         linear_ = 1.0;
         break;
       case KEYCODE_D:
-        ROS_DEBUG("DOWN");
+        ROS_INFO("DOWN");
         linear_ = -1.0;
         break;
     }
