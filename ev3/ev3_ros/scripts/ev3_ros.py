@@ -62,8 +62,8 @@ class Device(object):
 
 
 class Motor(Device):
-    POWER_TO_NM = 100
-    POWER_MAX = 100
+    POWER_TO_NM = 50
+    POWER_MAX = 50
 
     def __init__(self, params, lego):
         super(Motor, self).__init__(params)
