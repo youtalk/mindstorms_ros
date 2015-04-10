@@ -24,5 +24,4 @@ catkin_package(
 # install Python-scripts
 install(PROGRAMS
 	scripts/ev3_ros.py
-	scripts/joint_states_aggregator.py
   DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})

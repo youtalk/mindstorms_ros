@@ -19,7 +19,5 @@ catkin_package(
 
 ## Install Python Examples
 install(PROGRAMS
-  sensor_tests/color_sensor_test.py
-  sensor_tests/touch_sensor_test.py
   DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
