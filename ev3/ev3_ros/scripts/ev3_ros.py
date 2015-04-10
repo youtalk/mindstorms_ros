@@ -75,10 +75,10 @@ class Motor(Device):
 
         # create publisher
         self.pub = rospy.Publisher('joint_state', JointState, queue_size=5)
-        self.last_js = None
 
         # create subscriber
-        self.sub = rospy.Subscriber('joint_command', JointCommand, self.cmd_cb, None, 2)
+        self.sub = rospy.Subscriber('joint_command', JointCommand, self.cmd_cb,
+                                    None, queue_size=2)
 
     def cmd_cb(self, msg):
         if msg.name == self.name:
@@ -92,16 +92,11 @@ class Motor(Device):
     def trigger(self):
         js = JointState()
         js.header.stamp = rospy.Time.now()
-        js.position.append(self.motor.position * math.pi / 180.0)
-        if self.last_js:
-            vel = (js.position[0] - self.last_js.position[0]) / \
-                  (js.header.stamp - self.last_js.header.stamp).to_sec()
-            js.velocity.append(vel)
-        else:
-            vel = 0
-            js.velocity.append(vel)
+        js.name.append(self.name)
+        js.position.append(math.radians(self.motor.position))
+        js.velocity.append(math.radians(self.motor.pulses_per_second))
+        js.effort.append(0)
         self.pub.publish(js)
-        self.last_js = js
 
         # send command
         self.motor.run_forever(int(self.cmd), regulation_mode=False)

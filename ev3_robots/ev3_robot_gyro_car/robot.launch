@@ -1,0 +1,39 @@
+<?xml version="1.0"?>
+<launch>
+  <arg name="host"/>
+
+  <param name="robot_description" textfile="$(find ev3_robot_gyro_car)/robot.urdf"/>
+
+  <node pkg="nxt_ros" type="joint_states_aggregator.py" name="js_agg" output="screen" />
+  <node name="robot_state_publisher" pkg="robot_state_publisher" type="state_publisher">
+    <param name="publish_frequency" value="100.0"/>
+  </node>
+
+  <node pkg="ev3_ros" type="ev3_ros.py" name="ev3_ros" output="screen" respawn="true">
+    <rosparam command="load" file="$(find ev3_robot_gyro_car)/robot.yaml" />
+    <param name="host" value="$(arg host)" />
+  </node>
+
+  <group ns="base_parameters">
+    <param name="r_wheel_joint" value="r_wheel_joint"/>
+    <param name="l_wheel_joint" value="l_wheel_joint"/>
+    <param name="wheel_radius" value="0.028"/>
+    <param name="wheel_basis" value="0.06"/>
+    <param name="vel_to_eff" value="0.5"/>
+  </group>
+
+  <!-- base controller -->
+  <node pkg="nxt_controllers" type="base_controller.py" name="base_controller" output="screen"/>
+
+  <!-- base odometry -->
+  <node pkg="nxt_controllers" type="base_odometry.py" name="base_odometry" output="screen"/>
+
+  <!-- robot pose ekf -->
+  <node pkg="robot_pose_ekf" type="robot_pose_ekf" name="robot_pose_ekf">
+    <remap from="imu_data" to="gyro_imu" />
+  </node>
+
+  <!-- fixed transform -->
+  <node pkg="tf" type="static_transform_publisher" name="base_footprint_fixed_publisher" args="0 0 0 0 0 0 base_footprint base_link 100"/>
+
+</launch>
