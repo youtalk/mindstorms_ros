@@ -1,0 +1,31 @@
+<?xml version="1.0"?>
+<package>
+  <name>ev3_ros</name>
+  <version>0.0.1</version>
+  <description>The ev3_ros package</description>
+
+  <maintainer email="yutaka.kondo@youtalk.jp">Yutaka Kondo</maintainer>
+
+  <license>BSD</license>
+
+  <!-- Url tags are optional, but mutiple are allowed, one per tag -->
+  <!-- Optional attribute type can be: website, bugtracker, or repository -->
+  <!-- Example: -->
+  <!-- <url type="website">http://wiki.ros.org/ev3_ros</url> -->
+
+  <author>Yutaka Kondo</author>
+
+  <buildtool_depend>catkin</buildtool_depend>
+
+  <build_depend>kdl</build_depend>
+  <build_depend>nxt_msgs</build_depend>
+  <build_depend>ev3_python</build_depend>
+  <build_depend>rospy</build_depend>
+  <build_depend>sensor_msgs</build_depend>
+
+  <run_depend>kdl</run_depend>
+  <run_depend>nxt_msgs</run_depend>
+  <run_depend>ev3_python</run_depend>
+  <run_depend>rospy</run_depend>
+  <run_depend>sensor_msgs</run_depend>
+</package>

@@ -52,7 +52,7 @@ class JSAggregator:
         # create motor
         self.sub = rospy.Subscriber('joint_state', JointState, self.callback)
         # create publisher
-        self.pub = rospy.Publisher('joint_states', JointState)
+        self.pub = rospy.Publisher('joint_states', JointState, queue_size=5)
         self.observed_states = {}
         self.updates_since_publish = 0
         
