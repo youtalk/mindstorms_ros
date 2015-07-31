@@ -1,7 +1,7 @@
 <package>
   <name>nxt</name>
   <version>1.0.0</version>
-  <description>This  has basic interfaces for interacting with ROS and NXT. The software in this 
+  <description>This  has basic interfaces for interacting with ROS and NXT. The software in this
      is intended to run on top of the default NXT firmware provided by lego.</description>
   <maintainer email="tfoote@willowgarage.com">Tully Foote</maintainer>
   <maintainer email="meeussen@willowgarage.com">Wim Meeussen</maintainer>
@@ -29,7 +29,6 @@
   <run_depend>nxt_msgs</run_depend>
   <run_depend>nxt_python</run_depend>
   <run_depend>nxt_ros</run_depend>
-  <run_depend>nxt_rviz_plugin</run_depend>
 
   <!-- Dependencies needed only for running tests. -->
 
